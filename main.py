@@ -9,16 +9,14 @@ from datetime import datetime, timedelta, timezone
 
 import models, schemas, database
 
-# --- CONFIGURATION SETTINGS ---
+
 SECRET_KEY = "SUPER_SECRET_DEVELOPMENT_KEY_CHANGE_THIS_IN_PRODUCTION"
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60
 
-# Fixed: Added back the missing token scheme definition
+
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
-# --- DIRECT BCRYPT HELPER FUNCTIONS ---
-# Fixed: Wiped out the old passlib/pwd_context functions completely
 def get_password_hash(password: str) -> str:
     pwd_bytes = password.encode('utf-8')
     salt = bcrypt.gensalt()
@@ -36,7 +34,7 @@ def create_access_token(data: dict):
     to_encode.update({"exp": expire})
     return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
 
-# --- DATABASE ENGINE INIT ---
+
 models.Base.metadata.create_all(bind=database.engine)
 app = FastAPI(title="Secure Job Tracker Hub")
 
@@ -48,7 +46,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# --- AUTH HELPER DEPENDENCY ---
+
 def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(database.get_db)):
     credentials_exception = HTTPException(status_code=401, detail="Could not validate credentials")
     try:
@@ -62,7 +60,7 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
     if user is None: raise credentials_exception
     return user
 
-# --- AUTH ROUTES ---
+
 @app.post("/register")
 def register(user: schemas.UserCreate, db: Session = Depends(database.get_db)):
     db_user = db.query(models.User).filter(models.User.email == user.email).first()
@@ -82,7 +80,7 @@ def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depend
     access_token = create_access_token(data={"sub": user.email})
     return {"access_token": access_token, "token_type": "bearer"}
 
-# --- AUTHENTICATED CRUD ROUTES ---
+
 @app.post("/jobs/", response_model=schemas.JobResponse)
 def create_job(job: schemas.JobCreate, db: Session = Depends(database.get_db), current_user: models.User = Depends(get_current_user)):
     db_job = models.Job(**job.model_dump(), user_id=current_user.id)
