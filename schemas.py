@@ -2,7 +2,7 @@ from pydantic import BaseModel
 from datetime import datetime
 from typing import Optional
 
-# --- JOB SCHEMAS ---
+
 class JobCreate(BaseModel):
     title: str
     company: str
@@ -26,7 +26,7 @@ class JobResponse(BaseModel):
     class Config:
         from_attributes = True
 
-# --- USER SCHEMAS (🆕 Add This) ---
+
 class UserCreate(BaseModel):
     email: str
     password: str
