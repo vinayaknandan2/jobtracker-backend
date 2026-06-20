@@ -20,5 +20,5 @@ class Job(Base):
     url = Column(String, nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     
-    # 🆕 Link jobs to a specific user
+
     user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
